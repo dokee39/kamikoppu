@@ -51,7 +51,7 @@ extern "C" {
 #define DFU_INTERFACE_STR_INDEX	 0xE0
 
 #define GSUSB_ENDPOINT_IN  0x81
-#define GSUSB_ENDPOINT_OUT 0x01
+#define GSUSB_ENDPOINT_OUT 0x02
 
 extern USBD_ClassTypeDef USBD_GS_CAN;
 
@@ -93,6 +93,7 @@ uint8_t USBD_GS_CAN_Init(USBD_HandleTypeDef *pdev, USBD_GS_CAN_HandleTypeDef *hc
 uint8_t USBD_GS_CAN_PrepareReceive(USBD_HandleTypeDef *pdev);
 uint8_t USBD_GS_CAN_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum);
 uint8_t USBD_GS_CAN_DataOut(USBD_HandleTypeDef *pdev, uint8_t epnum);
+uint8_t USBD_GS_CAN_SOF(struct _USBD_HandleTypeDef *pdev);
 uint8_t USBD_GS_CAN_EP0_RxReady(USBD_HandleTypeDef *pdev);
 uint8_t USBD_GS_CAN_Setup(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *req);
 uint8_t USBD_GS_CAN_GetChannelNumber(USBD_HandleTypeDef *pdev, CAN_HANDLE_TYPEDEF* handle);

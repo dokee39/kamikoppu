@@ -63,7 +63,7 @@
   */
 
 /*---------- -----------*/
-#define USBD_MAX_NUM_INTERFACES     1U
+#define USBD_MAX_NUM_INTERFACES     5U // cchere
 /*---------- -----------*/
 #define USBD_MAX_NUM_CONFIGURATION     1U
 /*---------- -----------*/
@@ -73,7 +73,7 @@
 /*---------- -----------*/
 #define USBD_LPM_ENABLED     1U
 /*---------- -----------*/
-#define USBD_SELF_POWERED     1U
+#define USBD_SELF_POWERED     0U
 
 /****************************************/
 /* #define for FS and HS identification */

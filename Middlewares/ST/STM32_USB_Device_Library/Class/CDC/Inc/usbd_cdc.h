@@ -41,13 +41,13 @@ extern "C" {
   * @{
   */
 #ifndef CDC_IN_EP
-#define CDC_IN_EP                                   0x82U  /* EP1 for data IN */
+#define CDC_IN_EP                                   0x83U  /* EP1 for data IN */
 #endif /* CDC_IN_EP */
 #ifndef CDC_OUT_EP
-#define CDC_OUT_EP                                  0x02U  /* EP1 for data OUT */
+#define CDC_OUT_EP                                  0x03U  /* EP1 for data OUT */
 #endif /* CDC_OUT_EP */
 #ifndef CDC_CMD_EP
-#define CDC_CMD_EP                                  0x83U  /* EP2 for CDC commands */
+#define CDC_CMD_EP                                  0x84U  /* EP2 for CDC commands */
 #endif /* CDC_CMD_EP  */
 
 #ifndef CDC_HS_BINTERVAL

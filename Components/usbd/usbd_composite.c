@@ -20,6 +20,7 @@ static uint8_t  USBD_Composite_DeInit (USBD_HandleTypeDef *pdev, uint8_t cfgidx)
 static uint8_t  USBD_Composite_Setup (USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *req);
 static uint8_t  USBD_Composite_DataIn (USBD_HandleTypeDef *pdev, uint8_t epnum);
 static uint8_t  USBD_Composite_DataOut (USBD_HandleTypeDef *pdev, uint8_t epnum);
+static uint8_t  USBD_Composite_SOF (USBD_HandleTypeDef *pdev);
 static uint8_t  *USBD_Composite_GetHSCfgDesc (uint16_t *length);
 static uint8_t  *USBD_Composite_GetFSCfgDesc (uint16_t *length);
 static uint8_t  *USBD_Composite_GetOtherSpeedCfgDesc (uint16_t *length);
@@ -37,7 +38,7 @@ USBD_ClassTypeDef  USBD_CMPSIT =
   USBD_Composite_RxReady, /*EP0_RxReady*/
   USBD_Composite_DataIn,
   USBD_Composite_DataOut,
-  NULL, /*SOF */
+  USBD_Composite_SOF, /*SOF */
   NULL,
   NULL,
   USBD_Composite_GetHSCfgDesc,
@@ -68,11 +69,11 @@ __ALIGN_BEGIN uint8_t USBD_Composite_CfgDesc[USBD_COMPOSITE_DESC_SIZ] __ALIGN_EN
   /* Interface Association Descriptor for GS_CAN */ // cchere
   USBD_IAD_DESC_SIZE,  // bLength: Interface Descriptor size，固定值
   USBD_IAD_DESCRIPTOR_TYPE,  // bDescriptorType: IAD，固定值
-  0X00,  // bFirstInterface，第一个接口的起始序号，从0开始
+  0X00,  // bFirstInterface，第一个接口的起始序号，从0开始 // cchere
   0X02,  // bInterfaceCount，本IAD下的接口数量
-  0xFF,                           /* bInterfaceClass: Vendor Specific*/
-  0xFF,                           /* bInterfaceSubClass: Vendor Specific */
-  0xFF,                           /* bInterfaceProtocol: Vendor Specific */
+  0x00,                           /* bInterfaceClass: Vendor Specific*/
+  0x00,                           /* bInterfaceSubClass: Vendor Specific */
+  0x00,                           /* bInterfaceProtocol: Vendor Specific */
   0X00,  // iFunction
 
 	/*---------------------------------------------------------------------------*/
@@ -137,7 +138,7 @@ __ALIGN_BEGIN uint8_t USBD_Composite_CfgDesc[USBD_COMPOSITE_DESC_SIZ] __ALIGN_EN
   /* Interface Association Descriptor for CDC */ // cchere
   USBD_IAD_DESC_SIZE,  // bLength: Interface Descriptor size，固定值
   USBD_IAD_DESCRIPTOR_TYPE,  // bDescriptorType: IAD，固定值
-  0X01,  // bFirstInterface，第一个接口的起始序号，从0开始
+  0X02,  // bFirstInterface，第一个接口的起始序号，从0开始 // cchere
   0X02,  // bInterfaceCount，本IAD下的接口数量
   0X02,  // bFunctionClass: CDC，表明该IAD是一个CDC类型的设备
   0X02,  // bFunctionSubClass：子类型，默认即可
@@ -355,6 +356,11 @@ uint8_t  USBD_Composite_DataOut (USBD_HandleTypeDef *pdev, uint8_t epnum)
         break;
 	}
 	return USBD_OK;
+}
+
+uint8_t  USBD_Composite_SOF (USBD_HandleTypeDef *pdev)
+{
+    return USBD_GS_CAN_SOF(pdev);
 }
 
 uint8_t  *USBD_Composite_GetHSCfgDesc (uint16_t *length)

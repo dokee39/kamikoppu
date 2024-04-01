@@ -42,6 +42,7 @@ extern TIM_HandleTypeDef htim_can;
 extern uint8_t USBD_StrDesc[USBD_MAX_STR_DESC_SIZ];
 extern USBD_GS_CAN_HandleTypeDef hGS_CAN;
 
+#ifndef USE_USBD_COMPOSITE
 /* Configuration Descriptor */
 static const uint8_t USBD_GS_CAN_CfgDesc[USB_CAN_CONFIG_DESC_SIZ] =
 {
@@ -117,6 +118,7 @@ static const uint8_t USBD_GS_CAN_CfgDesc[USB_CAN_CONFIG_DESC_SIZ] =
 	0x1a, 0x01,                     /* bcdDFUVersion: 1.1a */
 
 };
+#endif /* USE_USBD_COMPOSITE  */
 
 /* Microsoft OS String Descriptor */
 static const uint8_t USBD_GS_CAN_WINUSB_STR[] =
@@ -556,19 +558,21 @@ uint8_t USBD_GS_CAN_DataOut(USBD_HandleTypeDef *pdev, uint8_t epnum) {
 	return USBD_OK;
 }
 
-static uint8_t USBD_GS_CAN_SOF(struct _USBD_HandleTypeDef *pdev)
+uint8_t USBD_GS_CAN_SOF(struct _USBD_HandleTypeDef *pdev)
 {
 	USBD_GS_CAN_HandleTypeDef *hcan = (USBD_GS_CAN_HandleTypeDef*) pdev->pClassData;
 	hcan->sof_timestamp_us = __HAL_TIM_GET_COUNTER(&htim_can);
 	return USBD_OK;
 }
 
+#ifndef USE_USBD_COMPOSITE
 static uint8_t *USBD_GS_CAN_GetCfgDesc(uint16_t *len)
 {
 	*len = sizeof(USBD_GS_CAN_CfgDesc);
 	memcpy(USBD_StrDesc, USBD_GS_CAN_CfgDesc, sizeof(USBD_GS_CAN_CfgDesc));
 	return USBD_StrDesc;
 }
+#endif /* USE_USBD_COMPOSITE  */
 
 uint8_t *USBD_GS_CAN_GetStrDesc(USBD_HandleTypeDef *pdev, uint8_t index, uint16_t *length)
 {
@@ -598,10 +602,12 @@ USBD_ClassTypeDef USBD_GS_CAN = {
 	.DataIn = USBD_GS_CAN_DataIn,
 	.DataOut = USBD_GS_CAN_DataOut,
 	.SOF = USBD_GS_CAN_SOF,
+#ifndef USE_USBD_COMPOSITE
 	.GetHSConfigDescriptor = USBD_GS_CAN_GetCfgDesc,
 	.GetFSConfigDescriptor = USBD_GS_CAN_GetCfgDesc,
 	.GetOtherSpeedConfigDescriptor = USBD_GS_CAN_GetCfgDesc,
 	.GetUsrStrDescriptor = USBD_GS_CAN_GetStrDesc,
+#endif
 };
 
 uint8_t USBD_GS_CAN_GetChannelNumber(USBD_HandleTypeDef *pdev, CAN_HANDLE_TYPEDEF* handle) {
