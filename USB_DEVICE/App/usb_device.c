@@ -31,6 +31,7 @@
 
 /* USER CODE BEGIN Includes */
 #include "usbd_gs_can.h"
+#include "usbd_composite.h"
 
 /* USER CODE END Includes */
 
@@ -165,7 +166,7 @@ void MX_USB_DEVICE_Init(void)
   {
     Error_Handler();
   }
-  if (USBD_RegisterClass(&hUSB, &USBD_GS_CAN) != USBD_OK)
+  if (USBD_RegisterClass(&hUSB, &USBD_CMPSIT) != USBD_OK)
   {
     Error_Handler();
   }

@@ -10,7 +10,6 @@
 #define USBD_COMPOSITE_DESC_SIZ (9 + 8 + 41 + 8 + 58) // cchere
 
 extern USBD_ClassTypeDef USBD_CMPSIT;
-extern USBD_DescriptorsTypeDef usbCmpsitFS_Desc;
 #ifdef USE_USBD_COMPOSITE
 void USBD_CMPSIT_AddClass(USBD_HandleTypeDef *pdev, USBD_ClassTypeDef *pclass, USBD_CompositeClassTypeDef classtype, uint8_t *EpAddr);
 #endif

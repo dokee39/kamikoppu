@@ -4,7 +4,7 @@
 #include "usbd_cdc_if.h"
 #include "usbd_gs_can.h"
 
-USBD_ClassTypeDef USBD_CMPSIT;
+extern USBD_ClassTypeDef USBD_CMPSIT;
 extern USBD_HandleTypeDef hUSB;
 extern USBD_GS_CAN_HandleTypeDef hGS_CAN;
 
@@ -28,7 +28,7 @@ static uint8_t USBD_Composite_RxReady (USBD_HandleTypeDef *pdev);
 static void USBD_Composite_Switch_GS_CAN(USBD_HandleTypeDef *pdev);
 static void USBD_Composite_Switch_CDC(USBD_HandleTypeDef *pdev);
 
-USBD_ClassTypeDef  USBD_Composite =
+USBD_ClassTypeDef  USBD_CMPSIT =
 {
   USBD_Composite_Init,
   USBD_Composite_DeInit,
