@@ -22,6 +22,7 @@
 #include "usbd_cdc_if.h"
 
 /* USER CODE BEGIN INCLUDE */
+#include "usbd_def.h"
 
 /* USER CODE END INCLUDE */
 
@@ -155,7 +156,11 @@ static int8_t CDC_Init_HS(void)
 {
   /* USER CODE BEGIN 8 */
   /* Set Application Buffers */
+  #ifdef USE_USBD_COMPOSITE
+  USBD_CDC_SetTxBuffer(&hUSB, UserTxBufferHS, 0, 1); // cchere
+  #else
   USBD_CDC_SetTxBuffer(&hUSB, UserTxBufferHS, 0);
+  #endif
   USBD_CDC_SetRxBuffer(&hUSB, UserRxBufferHS);
   return (USBD_OK);
   /* USER CODE END 8 */
@@ -285,8 +290,13 @@ uint8_t CDC_Transmit_HS(uint8_t* Buf, uint16_t Len)
   if (hcdc->TxState != 0){
     return USBD_BUSY;
   }
+  #ifdef USE_USBD_COMPOSITE
+  USBD_CDC_SetTxBuffer(&hUSB, Buf, Len, 1); // cchere
+  result = USBD_CDC_TransmitPacket(&hUSB, 1);
+  #else
   USBD_CDC_SetTxBuffer(&hUSB, Buf, Len);
   result = USBD_CDC_TransmitPacket(&hUSB);
+  #endif
   /* USER CODE END 12 */
   return result;
 }

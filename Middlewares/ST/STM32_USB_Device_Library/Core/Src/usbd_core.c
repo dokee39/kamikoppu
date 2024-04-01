@@ -20,7 +20,7 @@
 #include "usbd_core.h"
 
 #ifdef USE_USBD_COMPOSITE
-#include "usbd_composite_builder.h"
+#include "usbd_composite.h"
 #endif /* USE_USBD_COMPOSITE */
 
 /** @addtogroup STM32_USBD_DEVICE_LIBRARY
@@ -350,7 +350,7 @@ USBD_StatusTypeDef  USBD_UnRegisterClassComposite(USBD_HandleTypeDef *pdev)
   }
 
   /* Reset the configuration descriptor */
-  (void)USBD_CMPST_ClearConfDesc(pdev);
+  // (void)USBD_CMPSIT_ClearConfDesc(pdev);
 
   /* Reset the class ID and number of classes */
   pdev->classId = 0U;

@@ -33,9 +33,6 @@ THE SOFTWARE.
 #define u32				   uint32_t
 #define u8				   uint8_t
 
-#define GSUSB_ENDPOINT_IN  0x81
-#define GSUSB_ENDPOINT_OUT 0x02
-
 
 #define GS_CAN_MODE_NORMAL		  0
 #define GS_CAN_MODE_LISTEN_ONLY	  (1<<0)

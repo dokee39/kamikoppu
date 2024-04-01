@@ -27,6 +27,8 @@ extern "C" {
 /* Includes ------------------------------------------------------------------*/
 #include "usbd_conf.h"
 
+#define USE_USBD_COMPOSITE
+
 /** @addtogroup STM32_USBD_DEVICE_LIBRARY
   * @{
   */
@@ -54,7 +56,7 @@ extern "C" {
 
 #ifdef USE_USBD_COMPOSITE
 #ifndef USBD_MAX_SUPPORTED_CLASS
-#define USBD_MAX_SUPPORTED_CLASS                       4U
+#define USBD_MAX_SUPPORTED_CLASS                       2U // cchere
 #endif /* USBD_MAX_SUPPORTED_CLASS */
 #else
 #ifndef USBD_MAX_SUPPORTED_CLASS
@@ -67,7 +69,7 @@ extern "C" {
 #endif /* USBD_MAX_CLASS_ENDPOINTS */
 
 #ifndef USBD_MAX_CLASS_INTERFACES
-#define USBD_MAX_CLASS_INTERFACES                      5U
+#define USBD_MAX_CLASS_INTERFACES                      4U // cchere
 #endif /* USBD_MAX_CLASS_INTERFACES */
 
 #ifndef USBD_LPM_ENABLED
@@ -79,7 +81,7 @@ extern "C" {
 #endif /*USBD_SELF_POWERED */
 
 #ifndef USBD_MAX_POWER
-#define USBD_MAX_POWER                                  0x32U /* 100 mA */
+#define USBD_MAX_POWER                                  0x96U /* 300 mA */
 #endif /* USBD_MAX_POWER */
 
 #ifndef USBD_SUPPORT_USER_STRING_DESC
