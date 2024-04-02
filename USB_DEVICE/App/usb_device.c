@@ -47,7 +47,7 @@
 
 /* USB Device Core handle declaration. */
 USBD_HandleTypeDef hUSB;
-USBD_GS_CAN_HandleTypeDef hGS_CAN;
+extern USBD_GS_CAN_HandleTypeDef hGS_CAN;
 
 /*
  * -- Insert your variables declaration here --

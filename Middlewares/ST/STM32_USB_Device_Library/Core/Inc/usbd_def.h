@@ -27,7 +27,7 @@ extern "C" {
 /* Includes ------------------------------------------------------------------*/
 #include "usbd_conf.h"
 
-#define USE_USBD_COMPOSITE
+// #define USE_USBD_COMPOSITE
 
 /** @addtogroup STM32_USBD_DEVICE_LIBRARY
   * @{
@@ -60,7 +60,7 @@ extern "C" {
 #endif /* USBD_MAX_SUPPORTED_CLASS */
 #else
 #ifndef USBD_MAX_SUPPORTED_CLASS
-#define USBD_MAX_SUPPORTED_CLASS                       1U
+#define USBD_MAX_SUPPORTED_CLASS                       2U // cchere
 #endif /* USBD_MAX_SUPPORTED_CLASS */
 #endif /* USE_USBD_COMPOSITE */
 
