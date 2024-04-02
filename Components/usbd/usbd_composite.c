@@ -25,8 +25,8 @@ static uint8_t  *USBD_Composite_GetFSCfgDesc (uint16_t *length);
 static uint8_t  *USBD_Composite_GetOtherSpeedCfgDesc (uint16_t *length);
 static uint8_t  *USBD_Composite_GetDeviceQualifierDescriptor (uint16_t *length);
 static uint8_t USBD_Composite_EP0_RxReady (USBD_HandleTypeDef *pdev);
-static void USBD_Composite_Switch_GS_CAN(USBD_HandleTypeDef *pdev);
-static void USBD_Composite_Switch_CDC(USBD_HandleTypeDef *pdev);
+void USBD_Composite_Switch_GS_CAN(USBD_HandleTypeDef *pdev);
+void USBD_Composite_Switch_CDC(USBD_HandleTypeDef *pdev);
 
 USBD_ClassTypeDef  USBD_CMPSIT =
 {
@@ -495,7 +495,7 @@ static uint8_t  USBD_Composite_EP0_RxReady (USBD_HandleTypeDef *pdev)
     return USBD_OK;
 }
 
-static void USBD_Composite_Switch_GS_CAN(USBD_HandleTypeDef *pdev)
+void USBD_Composite_Switch_GS_CAN(USBD_HandleTypeDef *pdev)
 {
     pdev->classId = USBD_GS_CAN_CLASSID;
     pdev->pClassData = phGS_CAN;
@@ -505,7 +505,7 @@ static void USBD_Composite_Switch_GS_CAN(USBD_HandleTypeDef *pdev)
   //   }
 }
 
-static void USBD_Composite_Switch_CDC(USBD_HandleTypeDef *pdev)
+void USBD_Composite_Switch_CDC(USBD_HandleTypeDef *pdev)
 {
     pdev->classId = USBD_CDC_CLASSID;
     pdev->pClassData = phCDC;

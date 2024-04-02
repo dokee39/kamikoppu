@@ -22,7 +22,9 @@
 #include "usbd_cdc_if.h"
 
 /* USER CODE BEGIN INCLUDE */
+#include "usbd_cdc.h"
 #include "usbd_def.h"
+#include "usbd_composite.h"
 
 /* USER CODE END INCLUDE */
 
@@ -156,6 +158,7 @@ static int8_t CDC_Init_HS(void)
 {
   /* USER CODE BEGIN 8 */
   /* Set Application Buffers */
+  // USBD_Composite_Switch_GS_CAN(&hUSB);
   #ifdef USE_USBD_COMPOSITE
   USBD_CDC_SetTxBuffer(&hUSB, UserTxBufferHS, 0, 1); // cchere
   #else
@@ -269,6 +272,7 @@ static int8_t CDC_Control_HS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
 static int8_t CDC_Receive_HS(uint8_t* Buf, uint32_t *Len)
 {
   /* USER CODE BEGIN 11 */
+  // USBD_Composite_Switch_GS_CAN(&hUSB);
   USBD_CDC_SetRxBuffer(&hUSB, &Buf[0]);
   USBD_CDC_ReceivePacket(&hUSB);
   CDC_Transmit_HS(Buf, *Len);
@@ -286,8 +290,10 @@ static int8_t CDC_Receive_HS(uint8_t* Buf, uint32_t *Len)
 uint8_t CDC_Transmit_HS(uint8_t* Buf, uint16_t Len)
 {
   uint8_t result = USBD_OK;
+  USBD_CDC_HandleTypeDef *hcdc;
   /* USER CODE BEGIN 12 */
-  USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*)hUSB.pClassData;
+  USBD_Composite_Switch_GS_CAN(&hUSB);
+  hcdc = (USBD_CDC_HandleTypeDef*)hUSB.pClassData;
   if (hcdc->TxState != 0){
     return USBD_BUSY;
   }

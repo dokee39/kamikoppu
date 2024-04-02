@@ -381,7 +381,7 @@ typedef struct _USBD_HandleTypeDef
   USBD_SetupReqTypedef    request;
   USBD_DescriptorsTypeDef *pDesc;
   USBD_ClassTypeDef       *pClass[USBD_MAX_SUPPORTED_CLASS];
-  void                    *pClassData;
+  void                    *pClassData[USBD_MAX_SUPPORTED_CLASS];
   void                    *pClassDataCmsit[USBD_MAX_SUPPORTED_CLASS];
   void                    *pUserData[USBD_MAX_SUPPORTED_CLASS];
   void                    *pData;
