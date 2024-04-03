@@ -25,11 +25,18 @@
 #include "spi.h"
 #include "tim.h"
 #include "usart.h"
-#include "usb_device.h"
+#include "usbd_tasks.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "FreeRTOS.h"
+#include "task.h"
+#include "queue.h"
+#include "led_task.h"
+#include "imu_task.h"
+#include "usbd_tasks.h"
+#include "usbd_gs_can.h"
 #include "FreeRTOS.h"
 #include "task.h"
 #include "vofa.h"
@@ -56,12 +63,18 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-#define W25Qxx_NumByteToTest   	32*1024					// �������ݵĳ��ȣ�32K
+#define W25Qxx_NumByteToTest   	32*1024
 
-int32_t OSPI_Status ; 		 //����־λ
+int32_t OSPI_Status;
 
-uint8_t  W25Qxx_WriteBuffer[W25Qxx_NumByteToTest];		//	д��������
-uint8_t  W25Qxx_ReadBuffer[W25Qxx_NumByteToTest];		//	����������
+uint8_t  W25Qxx_WriteBuffer[W25Qxx_NumByteToTest];
+uint8_t  W25Qxx_ReadBuffer[W25Qxx_NumByteToTest];
+
+static TaskHandle_t xCreatedLedTask;
+static TaskHandle_t xCreatedImuTask;
+static TaskHandle_t xCreatedGsCanQueueToHostTask;
+static TaskHandle_t xCreatedGsCanQueueFromHostTask;
+extern USBD_GS_CAN_HandleTypeDef hGS_CAN;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -122,12 +135,16 @@ int main(void)
   MX_TIM2_Init();
   MX_OCTOSPI2_Init();
   /* USER CODE BEGIN 2 */
-  HAL_TIM_Base_Start(&htim2);
-  MX_USB_DEVICE_Init();
-  /* USER CODE END 2 */
+    HAL_TIM_Base_Start(&htim2);
+    usbd_tasks_init();
 
-  /* Call init function for freertos objects (in freertos.c) */
-  MX_FREERTOS_Init();
+    hGS_CAN.queue_from_hostHandle = xQueueCreate(QUEUE_SIZE_HOST_TO_DEV, GS_HOST_FRAME_SIZE);
+    hGS_CAN.queue_to_hostHandle = xQueueCreate(QUEUE_SIZE_DEV_TO_HOST, GS_HOST_FRAME_SIZE);
+
+    xTaskCreate(led_task, "led task", configMINIMAL_STACK_SIZE, NULL, (tskIDLE_PRIORITY + 1), &xCreatedLedTask);
+    xTaskCreate(imu_task, "imu task", configMINIMAL_STACK_SIZE * 8, NULL, (tskIDLE_PRIORITY + 6), &xCreatedImuTask);
+    xTaskCreate(usbd_gs_can_queue_to_host_task, "gs_can to task", configMINIMAL_STACK_SIZE, NULL, (tskIDLE_PRIORITY + 5), &xCreatedGsCanQueueToHostTask);
+    xTaskCreate(usbd_gs_can_queue_from_host_task, "gs_can from task", configMINIMAL_STACK_SIZE, NULL, (tskIDLE_PRIORITY + 5), &xCreatedGsCanQueueFromHostTask);
 
   /* Start scheduler */
     vTaskStartScheduler();

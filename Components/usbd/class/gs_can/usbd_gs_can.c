@@ -42,6 +42,9 @@ THE SOFTWARE.
 extern TIM_HandleTypeDef htim_can;
 extern uint8_t USBD_StrDesc[USBD_MAX_STR_DESC_SIZ];
 extern USBD_GS_CAN_HandleTypeDef hGS_CAN;
+extern FDCAN_HandleTypeDef hfdcan1;
+extern FDCAN_HandleTypeDef hfdcan2;
+extern FDCAN_HandleTypeDef hfdcan3;
 
 #ifndef USE_USBD_COMPOSITE
 /* Configuration Descriptor */
@@ -279,6 +282,13 @@ static const struct gs_device_bt_const_extended USBD_GS_CAN_btconst_extended = {
 	.dbrp_max = 1024, //dbrp_max
 	.dbrp_inc = 1, // dbrp_inc;
 };
+
+void USBD_GS_CAN_Register_CAN(USBD_GS_CAN_HandleTypeDef *hcan)
+{
+    hcan->channels[0] = &hfdcan1;
+    hcan->channels[1] = &hfdcan2;
+    hcan->channels[2] = &hfdcan3;
+}
 
 uint8_t USBD_GS_CAN_Init(USBD_HandleTypeDef *pdev, USBD_GS_CAN_HandleTypeDef *hcan)
 {

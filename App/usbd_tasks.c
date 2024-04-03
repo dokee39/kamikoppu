@@ -1,26 +1,4 @@
-/* USER CODE BEGIN Header */
-/**
-  ******************************************************************************
-  * @file           : usb_device.c
-  * @version        : v1.0_Cube
-  * @brief          : This file implements the USB Device
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2024 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
-/* USER CODE END Header */
-
-/* Includes ------------------------------------------------------------------*/
-
-#include "usb_device.h"
+#include "usbd_tasks.h"
 #include "fdcan.h"
 #include "main.h"
 #include "stm32h7xx_hal_fdcan.h"
@@ -29,44 +7,14 @@
 #include "usbd_cdc.h"
 #include "usbd_cdc_if.h"
 
-/* USER CODE BEGIN Includes */
 #include "usbd_gs_can.h"
 #include "usbd_composite.h"
 
-/* USER CODE END Includes */
-
-/* USER CODE BEGIN PV */
-/* Private variables ---------------------------------------------------------*/
-
-/* USER CODE END PV */
-
-/* USER CODE BEGIN PFP */
-/* Private function prototypes -----------------------------------------------*/
-
-/* USER CODE END PFP */
-
-/* USB Device Core handle declaration. */
 USBD_HandleTypeDef hUSB;
 extern USBD_GS_CAN_HandleTypeDef hGS_CAN;
 
-/*
- * -- Insert your variables declaration here --
- */
-/* USER CODE BEGIN 0 */
-
-/* USER CODE END 0 */
-
-/*
- * -- Insert your external function declaration here --
- */
-/* USER CODE BEGIN 1 */
-extern FDCAN_HandleTypeDef hfdcan1;
-extern FDCAN_HandleTypeDef hfdcan2;
-extern FDCAN_HandleTypeDef hfdcan3;
-
 void usbd_gs_can_queue_to_host_task(void *argument);
 void usbd_gs_can_queue_from_host_task(void *argument);
-static void usbd_class_gs_can_init(void);
 
 void usbd_gs_can_queue_to_host_task(void *argument)
 {
@@ -134,34 +82,8 @@ void usbd_gs_can_queue_from_host_task(void *argument)
     }
 }
 
-void usbd_class_gs_can_init(void)
+void usbd_tasks_init(void)
 {
-	hGS_CAN.channels[0] = &hfdcan1;
-	hGS_CAN.channels[1] = &hfdcan2;
-	hGS_CAN.channels[2] = &hfdcan3;
-    // MX_FDCAN1_Init();
-    // MX_FDCAN2_Init();
-    // MX_FDCAN3_Init();
-	// can_init(hGS_CAN.channels[0], FDCAN1);
-	// can_init(hGS_CAN.channels[1], FDCAN2);
-	// can_init(hGS_CAN.channels[2], FDCAN3);
-	// led_init(&hled1, LED1_GPIO_Port, LED1_Pin, LED_MODE_INACTIVE, LED_ACTIVE_LOW);
-	// host_channel_is_active = false;
-}
-/* USER CODE END 1 */
-
-/**
-  * Init USB device Library, add supported class and start the library
-  * @retval None
-  */
-void MX_USB_DEVICE_Init(void)
-{
-  /* USER CODE BEGIN USB_DEVICE_Init_PreTreatment */
-    usbd_class_gs_can_init();
-
-  /* USER CODE END USB_DEVICE_Init_PreTreatment */
-
-  /* Init Device Library, add supported class and start the library. */
   if (USBD_Init(&hUSB, &HS_Desc, DEVICE_HS) != USBD_OK)
   {
     Error_Handler();
@@ -175,17 +97,6 @@ void MX_USB_DEVICE_Init(void)
     Error_Handler();
   }
 
-  /* USER CODE BEGIN USB_DEVICE_Init_PostTreatment */
   HAL_PWREx_EnableUSBVoltageDetector();
-
-  /* USER CODE END USB_DEVICE_Init_PostTreatment */
 }
-
-/**
-  * @}
-  */
-
-/**
-  * @}
-  */
 

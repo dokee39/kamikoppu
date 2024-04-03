@@ -244,6 +244,7 @@ uint8_t USBD_Composite_Init (USBD_HandleTypeDef *pdev, uint8_t cfgidx)
     uint8_t res = 0;
 
     pdev->pUserData[USBD_GS_CAN_CLASSID] = NULL;
+    USBD_GS_CAN_Register_CAN(&hGS_CAN);
     USBD_GS_CAN_Init(pdev, &hGS_CAN);
     phGS_CAN = pdev->pClassData[USBD_GS_CAN_CLASSID];
     res += USBD_GS_CAN.Init(pdev, cfgidx);

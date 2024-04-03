@@ -1,69 +1,6 @@
-/* USER CODE BEGIN Header */
-/**
-  ******************************************************************************
-  * File Name          : freertos.c
-  * Description        : Code for freertos applications
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2024 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
-/* USER CODE END Header */
-
-/* Includes ------------------------------------------------------------------*/
 #include "FreeRTOS.h"
 #include "task.h"
 #include "main.h"
-
-/* Private includes ----------------------------------------------------------*/
-/* USER CODE BEGIN Includes */
-#include "queue.h"
-#include "led_task.h"
-#include "imu_task.h"
-#include "usb_device.h"
-#include "usbd_gs_can.h"
-
-/* USER CODE END Includes */
-
-/* Private typedef -----------------------------------------------------------*/
-/* USER CODE BEGIN PTD */
-
-/* USER CODE END PTD */
-
-/* Private define ------------------------------------------------------------*/
-/* USER CODE BEGIN PD */
-
-/* USER CODE END PD */
-
-/* Private macro -------------------------------------------------------------*/
-/* USER CODE BEGIN PM */
-
-/* USER CODE END PM */
-
-/* Private variables ---------------------------------------------------------*/
-/* USER CODE BEGIN Variables */
-static TaskHandle_t xCreatedLedTask;
-static TaskHandle_t xCreatedImuTask;
-static TaskHandle_t xCreatedGsCanQueueToHostTask;
-static TaskHandle_t xCreatedGsCanQueueFromHostTask;
-extern USBD_GS_CAN_HandleTypeDef hGS_CAN;
-
-/* USER CODE END Variables */
-
-/* Private function prototypes -----------------------------------------------*/
-/* USER CODE BEGIN FunctionPrototypes */
-
-/* USER CODE END FunctionPrototypes */
-
-extern void MX_USB_DEVICE_Init(void);
-void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
 /* GetIdleTaskMemory prototype (linked to static allocation support) */
 void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer, StackType_t **ppxIdleTaskStackBuffer, uint32_t *pulIdleTaskStackSize );
@@ -71,7 +8,6 @@ void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer, StackTy
 /* GetTimerTaskMemory prototype (linked to static allocation support) */
 void vApplicationGetTimerTaskMemory( StaticTask_t **ppxTimerTaskTCBBuffer, StackType_t **ppxTimerTaskStackBuffer, uint32_t *pulTimerTaskStackSize );
 
-/* USER CODE BEGIN GET_IDLE_TASK_MEMORY */
 static StaticTask_t xIdleTaskTCBBuffer;
 static StackType_t xIdleStack[configMINIMAL_STACK_SIZE];
 
@@ -82,9 +18,7 @@ void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer, StackTy
   *pulIdleTaskStackSize = configMINIMAL_STACK_SIZE;
   /* place for user code */
 }
-/* USER CODE END GET_IDLE_TASK_MEMORY */
 
-/* USER CODE BEGIN GET_TIMER_TASK_MEMORY */
 static StaticTask_t xTimerTaskTCBBuffer;
 static StackType_t xTimerStack[configTIMER_TASK_STACK_DEPTH];
 
@@ -95,59 +29,3 @@ void vApplicationGetTimerTaskMemory( StaticTask_t **ppxTimerTaskTCBBuffer, Stack
   *pulTimerTaskStackSize = configTIMER_TASK_STACK_DEPTH;
   /* place for user code */
 }
-/* USER CODE END GET_TIMER_TASK_MEMORY */
-
-/**
-  * @brief  FreeRTOS initialization
-  * @param  None
-  * @retval None
-  */
-void MX_FREERTOS_Init(void) {
-  /* USER CODE BEGIN Init */
-
-  /* USER CODE END Init */
-
-  /* USER CODE BEGIN RTOS_MUTEX */
-  /* add mutexes, ... */
-  /* USER CODE END RTOS_MUTEX */
-
-  /* USER CODE BEGIN RTOS_SEMAPHORES */
-  /* add semaphores, ... */
-  /* USER CODE END RTOS_SEMAPHORES */
-
-  /* USER CODE BEGIN RTOS_TIMERS */
-  /* start timers, add new ones, ... */
-  /* USER CODE END RTOS_TIMERS */
-
-  /* USER CODE BEGIN RTOS_QUEUES */
-  /* add queues, ... */
-  hGS_CAN.queue_from_hostHandle = xQueueCreate(QUEUE_SIZE_HOST_TO_DEV, GS_HOST_FRAME_SIZE);
-  hGS_CAN.queue_to_hostHandle = xQueueCreate(QUEUE_SIZE_DEV_TO_HOST, GS_HOST_FRAME_SIZE);
-    
-  /* USER CODE END RTOS_QUEUES */
-
-  /* Create the thread(s) */
-  /* definition and creation of defaultTask */
-
-  /* USER CODE BEGIN RTOS_THREADS */
-  /* add threads, ... */
-    xTaskCreate(led_task, "led task", configMINIMAL_STACK_SIZE, NULL, (tskIDLE_PRIORITY + 1), &xCreatedLedTask);
-    xTaskCreate(imu_task, "imu task", configMINIMAL_STACK_SIZE * 8, NULL, (tskIDLE_PRIORITY + 6), &xCreatedImuTask);
-    xTaskCreate(usbd_gs_can_queue_to_host_task, "gs_can to task", configMINIMAL_STACK_SIZE, NULL, (tskIDLE_PRIORITY + 5), &xCreatedGsCanQueueToHostTask);
-    xTaskCreate(usbd_gs_can_queue_from_host_task, "gs_can from task", configMINIMAL_STACK_SIZE, NULL, (tskIDLE_PRIORITY + 5), &xCreatedGsCanQueueFromHostTask);
-  /* USER CODE END RTOS_THREADS */
-
-}
-
-/* USER CODE BEGIN Header_StartDefaultTask */
-/**
-  * @brief  Function implementing the defaultTask thread.
-  * @param  argument: Not used
-  * @retval None
-  */
-/* USER CODE END Header_StartDefaultTask */
-
-/* Private application code --------------------------------------------------*/
-/* USER CODE BEGIN Application */
-
-/* USER CODE END Application */

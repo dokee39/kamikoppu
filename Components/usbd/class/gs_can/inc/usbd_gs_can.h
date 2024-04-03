@@ -89,6 +89,7 @@ typedef struct {
 } USBD_GS_CAN_HandleTypeDef __attribute__ ((aligned (4)));
 
 /* Exported functions --------------------------------------------------------*/
+void USBD_GS_CAN_Register_CAN(USBD_GS_CAN_HandleTypeDef *hcan);
 uint8_t USBD_GS_CAN_Init(USBD_HandleTypeDef *pdev, USBD_GS_CAN_HandleTypeDef *hcan);
 uint8_t USBD_GS_CAN_PrepareReceive(USBD_HandleTypeDef *pdev);
 uint8_t USBD_GS_CAN_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum);

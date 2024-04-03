@@ -52,9 +52,6 @@ Core \
 Drivers/CMSIS/Device/ST/STM32H7xx/Include \
 Drivers/CMSIS/Include \
 Drivers/STM32H7xx_HAL_Driver \
-Middlewares/Third_Party/FreeRTOS \
-Middlewares/ST/STM32_USB_Device_Library \
-USB_DEVICE \
 startup_stm32h723xx.s
 
 # where the output files are stored
