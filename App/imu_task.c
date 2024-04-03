@@ -6,8 +6,9 @@
 #include "BMI088driver.h"
 #include "MahonyAHRS.h"
 #include "tim.h"
-#include "vofa.h"
 #include <math.h>
+// #warning "debug"
+// #include "vofa.h"
 
 #define DES_TEMP    40.0f
 #define KP          100.f
@@ -79,10 +80,11 @@ void imu_task(void *argument)
         if (out < 0) out = 0.f;
         htim3.Instance->CCR4 = (uint16_t)out;
         
-        vofa_send_data(0, imuAngle[0]);
-        vofa_send_data(1, imuAngle[1]);
-        vofa_send_data(2, imuAngle[2]);
-        vofa_sendframetail();
+        // #warning "debug"
+        // vofa_send_data(0, imuAngle[0]);
+        // vofa_send_data(1, imuAngle[1]);
+        // vofa_send_data(2, imuAngle[2]);
+        // vofa_sendframetail();
         
         vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(1));
     }
