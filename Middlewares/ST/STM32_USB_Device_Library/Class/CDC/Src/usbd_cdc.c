@@ -58,6 +58,7 @@ EndBSPDependencies */
 /* Includes ------------------------------------------------------------------*/
 #include "usbd_cdc.h"
 #include "usbd_ctlreq.h"
+#include "usbd_composite.h"
 
 
 /** @addtogroup STM32_USB_DEVICE_LIBRARY
@@ -293,20 +294,20 @@ uint8_t USBD_CDC_Init(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
 
   if (hcdc == NULL)
   {
-    pdev->pClassDataCmsit[pdev->classId] = NULL;
+    pdev->pClassDataCmsit[USBD_CDC_CLASSID] = NULL;
     return (uint8_t)USBD_EMEM;
   }
 
   (void)USBD_memset(hcdc, 0, sizeof(USBD_CDC_HandleTypeDef));
 
-  pdev->pClassDataCmsit[pdev->classId] = (void *)hcdc;
-  pdev->pClassData = pdev->pClassDataCmsit[pdev->classId];
+  pdev->pClassDataCmsit[USBD_CDC_CLASSID] = (void *)hcdc;
+  pdev->pClassData[USBD_CDC_CLASSID] = pdev->pClassDataCmsit[USBD_CDC_CLASSID];
 
 #ifdef USE_USBD_COMPOSITE
   /* Get the Endpoints addresses allocated for this class instance */
-  CDCInEpAdd  = USBD_CoreGetEPAdd(pdev, USBD_EP_IN, USBD_EP_TYPE_BULK, (uint8_t)pdev->classId);
-  CDCOutEpAdd = USBD_CoreGetEPAdd(pdev, USBD_EP_OUT, USBD_EP_TYPE_BULK, (uint8_t)pdev->classId);
-  CDCCmdEpAdd = USBD_CoreGetEPAdd(pdev, USBD_EP_IN, USBD_EP_TYPE_INTR, (uint8_t)pdev->classId);
+  CDCInEpAdd  = USBD_CoreGetEPAdd(pdev, USBD_EP_IN, USBD_EP_TYPE_BULK, (uint8_t)USBD_CDC_CLASSID);
+  CDCOutEpAdd = USBD_CoreGetEPAdd(pdev, USBD_EP_OUT, USBD_EP_TYPE_BULK, (uint8_t)USBD_CDC_CLASSID);
+  CDCCmdEpAdd = USBD_CoreGetEPAdd(pdev, USBD_EP_IN, USBD_EP_TYPE_INTR, (uint8_t)USBD_CDC_CLASSID);
 #endif /* USE_USBD_COMPOSITE */
 
   if (pdev->dev_speed == USBD_SPEED_HIGH)
@@ -351,7 +352,7 @@ uint8_t USBD_CDC_Init(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
   hcdc->RxBuffer = NULL;
 
   /* Init  physical Interface components */
-  ((USBD_CDC_ItfTypeDef *)pdev->pUserData[pdev->classId])->Init();
+  ((USBD_CDC_ItfTypeDef *)pdev->pUserData[USBD_CDC_CLASSID])->Init();
 
   /* Init Xfer states */
   hcdc->TxState = 0U;
@@ -392,9 +393,9 @@ uint8_t USBD_CDC_DeInit(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
 
 #ifdef USE_USBD_COMPOSITE
   /* Get the Endpoints addresses allocated for this CDC class instance */
-  CDCInEpAdd  = USBD_CoreGetEPAdd(pdev, USBD_EP_IN, USBD_EP_TYPE_BULK, (uint8_t)pdev->classId);
-  CDCOutEpAdd = USBD_CoreGetEPAdd(pdev, USBD_EP_OUT, USBD_EP_TYPE_BULK, (uint8_t)pdev->classId);
-  CDCCmdEpAdd = USBD_CoreGetEPAdd(pdev, USBD_EP_IN, USBD_EP_TYPE_INTR, (uint8_t)pdev->classId);
+  CDCInEpAdd  = USBD_CoreGetEPAdd(pdev, USBD_EP_IN, USBD_EP_TYPE_BULK, (uint8_t)USBD_CDC_CLASSID);
+  CDCOutEpAdd = USBD_CoreGetEPAdd(pdev, USBD_EP_OUT, USBD_EP_TYPE_BULK, (uint8_t)USBD_CDC_CLASSID);
+  CDCCmdEpAdd = USBD_CoreGetEPAdd(pdev, USBD_EP_IN, USBD_EP_TYPE_INTR, (uint8_t)USBD_CDC_CLASSID);
 #endif /* USE_USBD_COMPOSITE */
 
   /* Close EP IN */
@@ -411,12 +412,12 @@ uint8_t USBD_CDC_DeInit(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
   pdev->ep_in[CDCCmdEpAdd & 0xFU].bInterval = 0U;
 
   /* DeInit  physical Interface components */
-  if (pdev->pClassDataCmsit[pdev->classId] != NULL)
+  if (pdev->pClassDataCmsit[USBD_CDC_CLASSID] != NULL)
   {
-    ((USBD_CDC_ItfTypeDef *)pdev->pUserData[pdev->classId])->DeInit();
-    (void)USBD_free(pdev->pClassDataCmsit[pdev->classId]);
-    pdev->pClassDataCmsit[pdev->classId] = NULL;
-    pdev->pClassData = NULL;
+    ((USBD_CDC_ItfTypeDef *)pdev->pUserData[USBD_CDC_CLASSID])->DeInit();
+    (void)USBD_free(pdev->pClassDataCmsit[USBD_CDC_CLASSID]);
+    pdev->pClassDataCmsit[USBD_CDC_CLASSID] = NULL;
+    pdev->pClassData[USBD_CDC_CLASSID] = NULL;
   }
 
   return (uint8_t)USBD_OK;
@@ -432,7 +433,7 @@ uint8_t USBD_CDC_DeInit(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
 uint8_t USBD_CDC_Setup(USBD_HandleTypeDef *pdev,
                               USBD_SetupReqTypedef *req)
 {
-  USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef *)pdev->pClassDataCmsit[pdev->classId];
+  USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef *)pdev->pClassDataCmsit[USBD_CDC_CLASSID];
   uint16_t len;
   uint8_t ifalt = 0U;
   uint16_t status_info = 0U;
@@ -450,7 +451,7 @@ uint8_t USBD_CDC_Setup(USBD_HandleTypeDef *pdev,
       {
         if ((req->bmRequest & 0x80U) != 0U)
         {
-          ((USBD_CDC_ItfTypeDef *)pdev->pUserData[pdev->classId])->Control(req->bRequest,
+          ((USBD_CDC_ItfTypeDef *)pdev->pUserData[USBD_CDC_CLASSID])->Control(req->bRequest,
                                                                            (uint8_t *)hcdc->data,
                                                                            req->wLength);
 
@@ -467,7 +468,7 @@ uint8_t USBD_CDC_Setup(USBD_HandleTypeDef *pdev,
       }
       else
       {
-        ((USBD_CDC_ItfTypeDef *)pdev->pUserData[pdev->classId])->Control(req->bRequest,
+        ((USBD_CDC_ItfTypeDef *)pdev->pUserData[USBD_CDC_CLASSID])->Control(req->bRequest,
                                                                          (uint8_t *)req, 0U);
       }
       break;
@@ -538,12 +539,12 @@ uint8_t USBD_CDC_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum)
   USBD_CDC_HandleTypeDef *hcdc;
   PCD_HandleTypeDef *hpcd = (PCD_HandleTypeDef *)pdev->pData;
 
-  if (pdev->pClassDataCmsit[pdev->classId] == NULL)
+  if (pdev->pClassDataCmsit[USBD_CDC_CLASSID] == NULL)
   {
     return (uint8_t)USBD_FAIL;
   }
 
-  hcdc = (USBD_CDC_HandleTypeDef *)pdev->pClassDataCmsit[pdev->classId];
+  hcdc = (USBD_CDC_HandleTypeDef *)pdev->pClassDataCmsit[USBD_CDC_CLASSID];
 
   if ((pdev->ep_in[epnum & 0xFU].total_length > 0U) &&
       ((pdev->ep_in[epnum & 0xFU].total_length % hpcd->IN_ep[epnum & 0xFU].maxpacket) == 0U))
@@ -558,9 +559,9 @@ uint8_t USBD_CDC_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum)
   {
     hcdc->TxState = 0U;
 
-    if (((USBD_CDC_ItfTypeDef *)pdev->pUserData[pdev->classId])->TransmitCplt != NULL)
+    if (((USBD_CDC_ItfTypeDef *)pdev->pUserData[USBD_CDC_CLASSID])->TransmitCplt != NULL)
     {
-      ((USBD_CDC_ItfTypeDef *)pdev->pUserData[pdev->classId])->TransmitCplt(hcdc->TxBuffer, &hcdc->TxLength, epnum);
+      ((USBD_CDC_ItfTypeDef *)pdev->pUserData[USBD_CDC_CLASSID])->TransmitCplt(hcdc->TxBuffer, &hcdc->TxLength, epnum);
     }
   }
 
@@ -576,9 +577,9 @@ uint8_t USBD_CDC_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum)
   */
 uint8_t USBD_CDC_DataOut(USBD_HandleTypeDef *pdev, uint8_t epnum)
 {
-  USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef *)pdev->pClassDataCmsit[pdev->classId];
+  USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef *)pdev->pClassDataCmsit[USBD_CDC_CLASSID];
 
-  if (pdev->pClassDataCmsit[pdev->classId] == NULL)
+  if (pdev->pClassDataCmsit[USBD_CDC_CLASSID] == NULL)
   {
     return (uint8_t)USBD_FAIL;
   }
@@ -589,7 +590,7 @@ uint8_t USBD_CDC_DataOut(USBD_HandleTypeDef *pdev, uint8_t epnum)
   /* USB data will be immediately processed, this allow next USB traffic being
   NAKed till the end of the application Xfer */
 
-  ((USBD_CDC_ItfTypeDef *)pdev->pUserData[pdev->classId])->Receive(hcdc->RxBuffer, &hcdc->RxLength);
+  ((USBD_CDC_ItfTypeDef *)pdev->pUserData[USBD_CDC_CLASSID])->Receive(hcdc->RxBuffer, &hcdc->RxLength);
 
   return (uint8_t)USBD_OK;
 }
@@ -602,16 +603,16 @@ uint8_t USBD_CDC_DataOut(USBD_HandleTypeDef *pdev, uint8_t epnum)
   */
 uint8_t USBD_CDC_EP0_RxReady(USBD_HandleTypeDef *pdev)
 {
-  USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef *)pdev->pClassDataCmsit[pdev->classId];
+  USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef *)pdev->pClassDataCmsit[USBD_CDC_CLASSID];
 
   if (hcdc == NULL)
   {
     return (uint8_t)USBD_FAIL;
   }
 
-  if ((pdev->pUserData[pdev->classId] != NULL) && (hcdc->CmdOpCode != 0xFFU))
+  if ((pdev->pUserData[USBD_CDC_CLASSID] != NULL) && (hcdc->CmdOpCode != 0xFFU))
   {
-    ((USBD_CDC_ItfTypeDef *)pdev->pUserData[pdev->classId])->Control(hcdc->CmdOpCode,
+    ((USBD_CDC_ItfTypeDef *)pdev->pUserData[USBD_CDC_CLASSID])->Control(hcdc->CmdOpCode,
                                                                      (uint8_t *)hcdc->data,
                                                                      (uint16_t)hcdc->CmdLength);
     hcdc->CmdOpCode = 0xFFU;
@@ -740,7 +741,7 @@ uint8_t USBD_CDC_RegisterInterface(USBD_HandleTypeDef *pdev,
     return (uint8_t)USBD_FAIL;
   }
 
-  pdev->pUserData[pdev->classId] = fops;
+  pdev->pUserData[USBD_CDC_CLASSID] = fops;
 
   return (uint8_t)USBD_OK;
 }
@@ -763,7 +764,7 @@ uint8_t USBD_CDC_SetTxBuffer(USBD_HandleTypeDef *pdev,
 uint8_t USBD_CDC_SetTxBuffer(USBD_HandleTypeDef *pdev,
                              uint8_t *pbuff, uint32_t length)
 {
-  USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef *)pdev->pClassDataCmsit[pdev->classId];
+  USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef *)pdev->pClassDataCmsit[USBD_CDC_CLASSID];
 #endif /* USE_USBD_COMPOSITE */
 
   if (hcdc == NULL)
@@ -785,7 +786,7 @@ uint8_t USBD_CDC_SetTxBuffer(USBD_HandleTypeDef *pdev,
   */
 uint8_t USBD_CDC_SetRxBuffer(USBD_HandleTypeDef *pdev, uint8_t *pbuff)
 {
-  USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef *)pdev->pClassDataCmsit[pdev->classId];
+  USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef *)pdev->pClassDataCmsit[USBD_CDC_CLASSID];
 
   if (hcdc == NULL)
   {
@@ -812,7 +813,7 @@ uint8_t USBD_CDC_TransmitPacket(USBD_HandleTypeDef *pdev, uint8_t ClassId)
 #else
 uint8_t USBD_CDC_TransmitPacket(USBD_HandleTypeDef *pdev)
 {
-  USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef *)pdev->pClassDataCmsit[pdev->classId];
+  USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef *)pdev->pClassDataCmsit[USBD_CDC_CLASSID];
 #endif  /* USE_USBD_COMPOSITE */
 
   USBD_StatusTypeDef ret = USBD_BUSY;
@@ -852,14 +853,14 @@ uint8_t USBD_CDC_TransmitPacket(USBD_HandleTypeDef *pdev)
   */
 uint8_t USBD_CDC_ReceivePacket(USBD_HandleTypeDef *pdev)
 {
-  USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef *)pdev->pClassDataCmsit[pdev->classId];
+  USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef *)pdev->pClassDataCmsit[USBD_CDC_CLASSID];
 
 #ifdef USE_USBD_COMPOSITE
   /* Get the Endpoints addresses allocated for this class instance */
-  CDCOutEpAdd = USBD_CoreGetEPAdd(pdev, USBD_EP_OUT, USBD_EP_TYPE_BULK, (uint8_t)pdev->classId);
+  CDCOutEpAdd = USBD_CoreGetEPAdd(pdev, USBD_EP_OUT, USBD_EP_TYPE_BULK, (uint8_t)USBD_CDC_CLASSID);
 #endif /* USE_USBD_COMPOSITE */
 
-  if (pdev->pClassDataCmsit[pdev->classId] == NULL)
+  if (pdev->pClassDataCmsit[USBD_CDC_CLASSID] == NULL)
   {
     return (uint8_t)USBD_FAIL;
   }

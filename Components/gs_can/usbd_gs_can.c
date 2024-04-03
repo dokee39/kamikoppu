@@ -31,6 +31,7 @@ THE SOFTWARE.
 #include "usbd_ctlreq.h"
 #include "usbd_ioreq.h"
 #include "usbd_gs_can.h"
+#include "usbd_composite.h"
 #include "main.h"
 #include "FreeRTOS.h"
 #include "queue.h"
@@ -282,13 +283,13 @@ static const struct gs_device_bt_const_extended USBD_GS_CAN_btconst_extended = {
 uint8_t USBD_GS_CAN_Init(USBD_HandleTypeDef *pdev, USBD_GS_CAN_HandleTypeDef *hcan)
 {
 	hcan->TxState = 0;
-	pdev->pClassData = hcan;
+	pdev->pClassData[USBD_GS_CAN_CLASSID] = hcan;
 	return USBD_OK;
 }
 
 uint8_t USBD_GS_CAN_PrepareReceive(USBD_HandleTypeDef *pdev)
 {
-	USBD_GS_CAN_HandleTypeDef *hcan = (USBD_GS_CAN_HandleTypeDef*)pdev->pClassData;
+	USBD_GS_CAN_HandleTypeDef *hcan = (USBD_GS_CAN_HandleTypeDef*)pdev->pClassData[USBD_GS_CAN_CLASSID];
 	return USBD_LL_PrepareReceive(pdev, GSUSB_ENDPOINT_OUT, (uint8_t*)&hcan->from_host_frame, sizeof(hcan->from_host_frame));
 }
 
@@ -296,7 +297,7 @@ static uint8_t USBD_GS_CAN_Start(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
 {
 	UNUSED(cfgidx);
 
-	assert_param(pdev->pClassData);
+	assert_param(pdev->pClassData[USBD_GS_CAN_CLASSID]);
 
 	USBD_LL_OpenEP(pdev, GSUSB_ENDPOINT_IN,	 USBD_EP_TYPE_BULK, CAN_DATA_MAX_PACKET_SIZE);
 	USBD_LL_OpenEP(pdev, GSUSB_ENDPOINT_OUT, USBD_EP_TYPE_BULK, CAN_DATA_MAX_PACKET_SIZE);
@@ -317,7 +318,7 @@ static uint8_t USBD_GS_CAN_DeInit(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
 
 static uint8_t USBD_GS_CAN_Config_Request(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *req)
 {
-	USBD_GS_CAN_HandleTypeDef *hcan = (USBD_GS_CAN_HandleTypeDef*) pdev->pClassData;
+	USBD_GS_CAN_HandleTypeDef *hcan = (USBD_GS_CAN_HandleTypeDef*) pdev->pClassData[USBD_GS_CAN_CLASSID];
 	uint32_t d32;
 
 	switch (req->bRequest) {
@@ -368,7 +369,7 @@ static uint8_t USBD_GS_CAN_Config_Request(USBD_HandleTypeDef *pdev, USBD_SetupRe
 
 static uint8_t USBD_GS_CAN_DFU_Request(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *req)
 {
-	USBD_GS_CAN_HandleTypeDef *hcan = (USBD_GS_CAN_HandleTypeDef*) pdev->pClassData;
+	USBD_GS_CAN_HandleTypeDef *hcan = (USBD_GS_CAN_HandleTypeDef*) pdev->pClassData[USBD_GS_CAN_CLASSID];
 	switch (req->bRequest) {
 		case 0: // DETACH request
 			hcan->dfu_detach_requested = true;
@@ -437,7 +438,7 @@ uint8_t USBD_GS_CAN_Setup(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *req)
 
 uint8_t USBD_GS_CAN_EP0_RxReady(USBD_HandleTypeDef *pdev) {
 
-	USBD_GS_CAN_HandleTypeDef *hcan = (USBD_GS_CAN_HandleTypeDef*) pdev->pClassData;
+	USBD_GS_CAN_HandleTypeDef *hcan = (USBD_GS_CAN_HandleTypeDef*) pdev->pClassData[USBD_GS_CAN_CLASSID];
 
 	struct gs_device_bittiming *timing;
 	struct gs_device_mode *mode;
@@ -531,14 +532,14 @@ uint8_t USBD_GS_CAN_EP0_RxReady(USBD_HandleTypeDef *pdev) {
 uint8_t USBD_GS_CAN_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum) {
 	(void) epnum;
 
-	USBD_GS_CAN_HandleTypeDef *hcan = (USBD_GS_CAN_HandleTypeDef*)pdev->pClassData;
+	USBD_GS_CAN_HandleTypeDef *hcan = (USBD_GS_CAN_HandleTypeDef*)pdev->pClassData[USBD_GS_CAN_CLASSID];
 	hcan->TxState = 0;
 	return USBD_OK;
 }
 
 // Note that the return value is completely ignored by the stack.
 uint8_t USBD_GS_CAN_DataOut(USBD_HandleTypeDef *pdev, uint8_t epnum) {
-	USBD_GS_CAN_HandleTypeDef *hcan = (USBD_GS_CAN_HandleTypeDef*)pdev->pClassData;
+	USBD_GS_CAN_HandleTypeDef *hcan = (USBD_GS_CAN_HandleTypeDef*)pdev->pClassData[USBD_GS_CAN_CLASSID];
 
 	uint32_t rxlen = USBD_LL_GetRxDataSize(pdev, epnum);
 #if defined(CANFD_FEATURE_ENABLED)
@@ -560,7 +561,7 @@ uint8_t USBD_GS_CAN_DataOut(USBD_HandleTypeDef *pdev, uint8_t epnum) {
 
 uint8_t USBD_GS_CAN_SOF(struct _USBD_HandleTypeDef *pdev)
 {
-	USBD_GS_CAN_HandleTypeDef *hcan = (USBD_GS_CAN_HandleTypeDef*) pdev->pClassData;
+	USBD_GS_CAN_HandleTypeDef *hcan = (USBD_GS_CAN_HandleTypeDef*) pdev->pClassData[USBD_GS_CAN_CLASSID];
 	hcan->sof_timestamp_us = __HAL_TIM_GET_COUNTER(&htim_can);
 	return USBD_OK;
 }
@@ -612,7 +613,7 @@ USBD_ClassTypeDef USBD_GS_CAN = {
 
 uint8_t USBD_GS_CAN_GetChannelNumber(USBD_HandleTypeDef *pdev, CAN_HANDLE_TYPEDEF* handle) {
 
-	USBD_GS_CAN_HandleTypeDef *hcan = (USBD_GS_CAN_HandleTypeDef*) pdev->pClassData;
+	USBD_GS_CAN_HandleTypeDef *hcan = (USBD_GS_CAN_HandleTypeDef*) pdev->pClassData[USBD_GS_CAN_CLASSID];
 	uint8_t channel = 0xFF;
 
 	for (uint8_t chan_index = 0; chan_index < CAN_NUM_CHANNELS; chan_index++) {
@@ -630,7 +631,7 @@ uint8_t USBD_GS_CAN_SendFrame(USBD_HandleTypeDef *pdev, struct gs_host_frame *fr
 	static uint8_t buf[GS_HOST_FRAME_SIZE];
 	uint8_t *send_addr;
 
-	USBD_GS_CAN_HandleTypeDef *hcan = (USBD_GS_CAN_HandleTypeDef*)pdev->pClassData;
+	USBD_GS_CAN_HandleTypeDef *hcan = (USBD_GS_CAN_HandleTypeDef*)pdev->pClassData[USBD_GS_CAN_CLASSID];
 	size_t len = 0;
 
   #if defined (CANFD_FEATURE_ENABLED)
@@ -704,7 +705,7 @@ bool USBD_GS_CAN_CustomInterfaceRequest(USBD_HandleTypeDef *pdev, USBD_SetupReqT
 
 bool USBD_GS_CAN_DfuDetachRequested(USBD_HandleTypeDef *pdev)
 {
-	USBD_GS_CAN_HandleTypeDef *hcan = (USBD_GS_CAN_HandleTypeDef*)pdev->pClassData;
+	USBD_GS_CAN_HandleTypeDef *hcan = (USBD_GS_CAN_HandleTypeDef*)pdev->pClassData[USBD_GS_CAN_CLASSID];
 	return hcan->dfu_detach_requested;
 }
 

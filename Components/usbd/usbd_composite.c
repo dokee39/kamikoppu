@@ -1,10 +1,8 @@
 #include "usbd_composite.h"
 #include "usbd_cdc.h"
 
-
 USBD_GS_CAN_HandleTypeDef hGS_CAN;
 USBD_GS_CAN_HandleTypeDef *phGS_CAN;
-USBD_CDC_HandleTypeDef hCDC;
 USBD_CDC_HandleTypeDef *phCDC;
 
 // extern uint8_t  USBD_CDC_Init(USBD_HandleTypeDef *pdev, uint8_t cfgidx);
@@ -241,67 +239,18 @@ uint8_t USBD_Composite_DeviceQualifierDesc[USB_LEN_DEV_QUALIFIER_DESC] =
 };
 
 
-// static void USBD_Composite_GS_CAN_Init(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
-// {
-// 	USBD_Composite_Switch_GS_CAN(pdev);
-//
-// 	/* Open EP OUT */
-// 	USBD_LL_OpenEP(pdev, GSUSB_ENDPOINT_OUT, USBD_EP_TYPE_BULK, CAN_DATA_MAX_PACKET_SIZE);
-// 	pdev->ep_out[GSUSB_ENDPOINT_OUT & 0xFU].is_used = 1U;
-//
-// 	/* Open EP IN */
-// 	USBD_LL_OpenEP(pdev, GSUSB_ENDPOINT_IN,	 USBD_EP_TYPE_BULK, CAN_DATA_MAX_PACKET_SIZE);
-// 	pdev->ep_in[GSUSB_ENDPOINT_IN & 0xFU].is_used = 1U;
-//
-// 	/* Prepare Out endpoint to receive next packet */
-// 	USBD_GS_CAN_PrepareReceive(pdev);
-// }
-//
-// static void USBD_Composite_CDC_Init(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
-// {
-// 	USBD_CDC_HandleTypeDef   *hcdc = NULL;
-//
-// 	USBD_Composite_Switch_CDC(pdev);
-//
-// 	/* Open EP IN */
-// 	USBD_LL_OpenEP(pdev, CDC_IN_EP, USBD_EP_TYPE_BULK, CDC_DATA_FS_IN_PACKET_SIZE);
-// 	pdev->ep_in[CDC_IN_EP & 0xFU].is_used = 1U;
-//
-// 	/* Open EP OUT */
-// 	USBD_LL_OpenEP(pdev, CDC_OUT_EP, USBD_EP_TYPE_BULK,CDC_DATA_FS_OUT_PACKET_SIZE);
-// 	pdev->ep_out[CDC_OUT_EP & 0xFU].is_used = 1U;
-//
-// 	/* Open Command IN EP */
-// 	USBD_LL_OpenEP(pdev, CDC_CMD_EP, USBD_EP_TYPE_INTR, CDC_CMD_PACKET_SIZE);
-// 	pdev->ep_in[CDC_CMD_EP & 0xFU].is_used = 1U;
-//
-// 	hcdc = (USBD_CDC_HandleTypeDef *) pdev->pClassData;
-//
-// 	/* Init  physical Interface components */
-// 	((USBD_CDC_ItfTypeDef *)pdev->pUserData)->Init();
-//
-// 	/* Init Xfer states */
-// 	hcdc->TxState = 0U;
-// 	hcdc->RxState = 0U;
-//
-// 	/* Prepare Out endpoint to receive next packet */
-// 	USBD_LL_PrepareReceive(pdev, CDC_OUT_EP, hcdc->RxBuffer, CDC_DATA_FS_OUT_PACKET_SIZE);
-// }
-
 uint8_t USBD_Composite_Init (USBD_HandleTypeDef *pdev, uint8_t cfgidx)
 {
     uint8_t res = 0;
 
-    pdev->classId = USBD_GS_CAN_CLASSID;
-    pdev->pUserData[pdev->classId] = NULL;
+    pdev->pUserData[USBD_GS_CAN_CLASSID] = NULL;
     USBD_GS_CAN_Init(pdev, &hGS_CAN);
-    phGS_CAN = pdev->pClassData;
+    phGS_CAN = pdev->pClassData[USBD_GS_CAN_CLASSID];
     res += USBD_GS_CAN.Init(pdev, cfgidx);
 
-    pdev->classId = USBD_CDC_CLASSID;
-    pdev->pUserData[pdev->classId] = &USBD_Interface_fops_HS;
+    pdev->pUserData[USBD_CDC_CLASSID] = &USBD_Interface_fops_HS;
     res += USBD_CDC.Init(pdev, cfgidx);
-    phCDC = pdev->pClassData;
+    phCDC = pdev->pClassData[USBD_CDC_CLASSID];
     
 	return res;
 }
@@ -310,12 +259,10 @@ uint8_t  USBD_Composite_DeInit (USBD_HandleTypeDef *pdev, uint8_t cfgidx)
 {
     uint8_t res = 0;
     
-    pdev->classId = USBD_GS_CAN_CLASSID;
-    pdev->pClassData = phGS_CAN;
+    pdev->pClassData[USBD_GS_CAN_CLASSID] = phGS_CAN;
     res += USBD_GS_CAN.DeInit(pdev, cfgidx);
     
-    pdev->classId = USBD_CDC_CLASSID;
-    pdev->pClassData = phCDC;
+    pdev->pClassData[USBD_CDC_CLASSID] = phCDC;
     res += USBD_CDC.DeInit(pdev, cfgidx);
 
     return res;
@@ -498,7 +445,7 @@ static uint8_t  USBD_Composite_EP0_RxReady (USBD_HandleTypeDef *pdev)
 void USBD_Composite_Switch_GS_CAN(USBD_HandleTypeDef *pdev)
 {
     pdev->classId = USBD_GS_CAN_CLASSID;
-    pdev->pClassData = phGS_CAN;
+    // pdev->pClassData = phGS_CAN;
   // if (USBD_GS_CAN_Init(&hUSB, &hGS_CAN) != USBD_OK)
   //   {
   //       Error_Handler();
@@ -508,7 +455,7 @@ void USBD_Composite_Switch_GS_CAN(USBD_HandleTypeDef *pdev)
 void USBD_Composite_Switch_CDC(USBD_HandleTypeDef *pdev)
 {
     pdev->classId = USBD_CDC_CLASSID;
-    pdev->pClassData = phCDC;
+    // pdev->pClassData = phCDC;
 	// static USBD_CDC_HandleTypeDef USBD_CDC_Handle;
 	// USBD_CDC_RegisterInterface(pdev, &USBD_Interface_fops_HS);
 	// pdev->pClassData = (void *)&USBD_CDC_Handle;

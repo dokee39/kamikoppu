@@ -24,7 +24,7 @@ void led_task(void *argument)
         WS2812_Ctrl(r, b, g);
         
 #warning "debug"
-        CDC_Transmit_HS((uint8_t *)"Hello World\n", 12);
+        // CDC_Transmit_HS((uint8_t *)"Hello World\n", 12);
         vTaskDelay(pdMS_TO_TICKS(10));
     }
 }

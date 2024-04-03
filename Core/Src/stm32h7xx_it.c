@@ -41,7 +41,8 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
-
+#include "usbd_def.h"
+extern USBD_HandleTypeDef hUSB;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -287,12 +288,13 @@ void USART3_IRQHandler(void)
 void OTG_HS_IRQHandler(void)
 {
   /* USER CODE BEGIN OTG_HS_IRQn 0 */
-
+    uint32_t classId_tmp = hUSB.classId;
   /* USER CODE END OTG_HS_IRQn 0 */
   HAL_PCD_IRQHandler(&hpcd_USB_OTG_HS);
   /* USER CODE BEGIN OTG_HS_IRQn 1 */
-    HAL_NVIC_SetPriority(OTG_HS_IRQn, 5, 0);
-    HAL_NVIC_EnableIRQ(OTG_HS_IRQn);
+    // HAL_NVIC_SetPriority(OTG_HS_IRQn, 5, 0);
+    // HAL_NVIC_EnableIRQ(OTG_HS_IRQn);
+    hUSB.classId = classId_tmp;
 
   /* USER CODE END OTG_HS_IRQn 1 */
 }
