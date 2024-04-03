@@ -18,7 +18,6 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "cmsis_os.h"
 #include "adc.h"
 #include "dma.h"
 #include "fdcan.h"
@@ -31,9 +30,12 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "FreeRTOS.h"
+#include "task.h"
 #include "vofa.h"
 #include "w25q64.h"
 #include <stdio.h>
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -128,7 +130,7 @@ int main(void)
   MX_FREERTOS_Init();
 
   /* Start scheduler */
-  osKernelStart();
+    vTaskStartScheduler();
 
   /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */

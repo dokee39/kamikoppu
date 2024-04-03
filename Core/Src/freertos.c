@@ -21,7 +21,6 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "main.h"
-#include "cmsis_os.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -57,14 +56,11 @@ static TaskHandle_t xCreatedGsCanQueueFromHostTask;
 extern USBD_GS_CAN_HandleTypeDef hGS_CAN;
 
 /* USER CODE END Variables */
-osThreadId defaultTaskHandle;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
 
 /* USER CODE END FunctionPrototypes */
-
-void StartDefaultTask(void const * argument);
 
 extern void MX_USB_DEVICE_Init(void);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
@@ -132,14 +128,11 @@ void MX_FREERTOS_Init(void) {
 
   /* Create the thread(s) */
   /* definition and creation of defaultTask */
-  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
-  defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
     xTaskCreate(led_task, "led task", configMINIMAL_STACK_SIZE, NULL, (tskIDLE_PRIORITY + 1), &xCreatedLedTask);
-    // xTaskCreate(imu_task, "imu task", configMINIMAL_STACK_SIZE * 8, NULL, (tskIDLE_PRIORITY + 6), &xCreatedImuTask);
-    #warning "imu_task causes stuck"
+    xTaskCreate(imu_task, "imu task", configMINIMAL_STACK_SIZE * 8, NULL, (tskIDLE_PRIORITY + 6), &xCreatedImuTask);
     xTaskCreate(usbd_gs_can_queue_to_host_task, "gs_can to task", configMINIMAL_STACK_SIZE, NULL, (tskIDLE_PRIORITY + 5), &xCreatedGsCanQueueToHostTask);
     xTaskCreate(usbd_gs_can_queue_from_host_task, "gs_can from task", configMINIMAL_STACK_SIZE, NULL, (tskIDLE_PRIORITY + 5), &xCreatedGsCanQueueFromHostTask);
   /* USER CODE END RTOS_THREADS */
@@ -153,18 +146,6 @@ void MX_FREERTOS_Init(void) {
   * @retval None
   */
 /* USER CODE END Header_StartDefaultTask */
-void StartDefaultTask(void const * argument)
-{
-  /* init code for USB_DEVICE */
-  // MX_USB_DEVICE_Init();
-  /* USER CODE BEGIN StartDefaultTask */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
-  /* USER CODE END StartDefaultTask */
-}
 
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */

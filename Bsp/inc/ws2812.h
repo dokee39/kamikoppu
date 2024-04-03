@@ -1,9 +1,7 @@
 #ifndef __WS2812_H__
 #define __WS2812_H__
  
- 
 #include "main.h" 
-
 
 #define WS2812_SPI_UNIT     hspi6
 extern SPI_HandleTypeDef WS2812_SPI_UNIT;

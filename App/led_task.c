@@ -8,13 +8,17 @@
 #warning "debug"
 #include "usbd_cdc_if.h"
 
-#define LED_FLOW_PERIOD 1200
+#define LED_FLOW_PERIOD pdMS_TO_TICKS(1200)
 #define LED_BRIGHTNESS 8
 
 void led_task(void *argument)
 {
+    TickType_t xLastWakeTime;
     uint32_t time = 0;
     uint8_t r, b, g;
+    
+    xLastWakeTime = xTaskGetTickCount();
+    
     for (;;) {
         time = xTaskGetTickCount();
         time %= LED_FLOW_PERIOD;
@@ -23,9 +27,9 @@ void led_task(void *argument)
         g = (sin(((float)time / LED_FLOW_PERIOD + 0.6666f) * 2 * 3.1415f) + 1) * LED_BRIGHTNESS;
         WS2812_Ctrl(r, b, g);
         
-#warning "debug"
-        // CDC_Transmit_HS((uint8_t *)"Hello World\n", 12);
-        vTaskDelay(pdMS_TO_TICKS(10));
+        #warning "debug"
+        CDC_Transmit_HS((uint8_t *)"Hello World!\n", 13);
+        vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(10));
     }
 }
 

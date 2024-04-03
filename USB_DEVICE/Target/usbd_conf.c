@@ -372,12 +372,11 @@ USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev)
   HAL_PCD_RegisterIsoInIncpltCallback(&hpcd_USB_OTG_HS, PCD_ISOINIncompleteCallback);
 #endif /* USE_HAL_PCD_REGISTER_CALLBACKS */
   /* USER CODE BEGIN TxRx_HS_Configuration */
-  HAL_PCDEx_SetRxFiFo(&hpcd_USB_OTG_HS, 0x200);
-  HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_HS, 0, 0x80);
-  HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_HS, 1, 0x174); 
-  HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_HS, 2, 0x174); 
-  HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_HS, 3, 0x174); 
-#warning "cchere"
+  HAL_PCDEx_SetRxFiFo(&hpcd_USB_OTG_HS, 0x400); // cchere
+  HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_HS, 0, 0x100);
+  HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_HS, GSUSB_ENDPOINT_IN & 0x07, 0x200); 
+  HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_HS, CDC_CMD_EP & 0x07, 0x20); 
+  HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_HS, CDC_IN_EP & 0x07, 0x200); 
   /* USER CODE END TxRx_HS_Configuration */
   }
   return USBD_OK;

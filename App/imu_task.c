@@ -1,4 +1,8 @@
 #include "imu_task.h"
+#include "FreeRTOS.h"
+#include "portmacro.h"
+#include "projdefs.h"
+#include "task.h"
 #include "BMI088driver.h"
 #include "MahonyAHRS.h"
 #include "tim.h"
@@ -44,27 +48,24 @@ void GetAngle(float q[4], float *yaw, float *pitch, float *roll)
     *roll = atan2f(2.0f*(q[0]*q[1]+q[2]*q[3]),2.0f*(q[0]*q[0]+q[3]*q[3])-1.0f);
 }
 
-/* USER CODE BEGIN Header_ImuTask_Entry */
-/**
-* @brief Function implementing the ImuTask thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_ImuTask_Entry */
 void imu_task(void *argument)
 {
-    /* USER CODE BEGIN ImuTask_Entry */
-    osDelay(10);
+    TickType_t xLastWakeTime;
+    
+    vTaskDelay(pdMS_TO_TICKS(10));
     HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_4);
+    
     while(BMI088_init())
     {
-        osDelay(100);
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
     
     AHRS_init(imuQuat);
-    /* Infinite loop */
+    xLastWakeTime = xTaskGetTickCount();
+    
     for(;;)
     {
+        
         BMI088_read(gyro, acc, &temp);
         
         AHRS_update(imuQuat, gyro, acc);
@@ -83,9 +84,8 @@ void imu_task(void *argument)
         vofa_send_data(2, imuAngle[2]);
         vofa_sendframetail();
         
-        osDelay(1);
+        vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(1));
     }
-    /* USER CODE END ImuTask_Entry */
 }
 
 

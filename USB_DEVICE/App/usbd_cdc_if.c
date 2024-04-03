@@ -273,7 +273,6 @@ static int8_t CDC_Receive_HS(uint8_t* Buf, uint32_t *Len)
   /* USER CODE BEGIN 11 */
   USBD_CDC_SetRxBuffer(&hUSB, &Buf[0]);
   USBD_CDC_ReceivePacket(&hUSB);
-  CDC_Transmit_HS(Buf, *Len);
   return (USBD_OK);
   /* USER CODE END 11 */
 }
