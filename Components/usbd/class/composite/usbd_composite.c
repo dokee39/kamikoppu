@@ -1,16 +1,8 @@
 #include "usbd_composite.h"
-#include "usbd_cdc.h"
 
 USBD_GS_CAN_HandleTypeDef hGS_CAN;
 USBD_GS_CAN_HandleTypeDef *phGS_CAN;
 USBD_CDC_HandleTypeDef *phCDC;
-
-// extern uint8_t  USBD_CDC_Init(USBD_HandleTypeDef *pdev, uint8_t cfgidx);
-// extern uint8_t  USBD_CDC_DeInit(USBD_HandleTypeDef *pdev, uint8_t cfgidx);
-// extern uint8_t  USBD_CDC_Setup(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *req);
-// extern uint8_t  USBD_CDC_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum);
-// extern uint8_t  USBD_CDC_DataOut(USBD_HandleTypeDef *pdev, uint8_t epnum);
-// extern uint8_t  USBD_CDC_EP0_RxReady(USBD_HandleTypeDef *pdev);
 
 static uint8_t  USBD_Composite_Init (USBD_HandleTypeDef *pdev, uint8_t cfgidx);
 static uint8_t  USBD_Composite_DeInit (USBD_HandleTypeDef *pdev, uint8_t cfgidx);
@@ -23,8 +15,8 @@ static uint8_t  *USBD_Composite_GetFSCfgDesc (uint16_t *length);
 static uint8_t  *USBD_Composite_GetOtherSpeedCfgDesc (uint16_t *length);
 static uint8_t  *USBD_Composite_GetDeviceQualifierDescriptor (uint16_t *length);
 static uint8_t USBD_Composite_EP0_RxReady (USBD_HandleTypeDef *pdev);
-void USBD_Composite_Switch_GS_CAN(USBD_HandleTypeDef *pdev);
-void USBD_Composite_Switch_CDC(USBD_HandleTypeDef *pdev);
+static void USBD_Composite_Switch_GS_CAN(USBD_HandleTypeDef *pdev);
+static void USBD_Composite_Switch_CDC(USBD_HandleTypeDef *pdev);
 
 USBD_ClassTypeDef  USBD_CMPSIT =
 {
@@ -220,6 +212,49 @@ __ALIGN_BEGIN uint8_t USBD_Composite_CfgDesc[USBD_COMPOSITE_DESC_SIZ] __ALIGN_EN
   HIBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),
   0x00,                               /* bInterval: ignore for Bulk transfer */
 
+  /** hid **********************************************************************/
+  /* Interface Association Descriptor for CDC */ // cchere
+  USBD_IAD_DESC_SIZE,  // bLength: Interface Descriptor size，固定值
+  USBD_IAD_DESCRIPTOR_TYPE,  // bDescriptorType: IAD，固定值
+  USBD_HID_FIRST_INTERFACE,  // bFirstInterface，第一个接口的起始序号，从0开始 // cchere
+  USBD_HID_INTERFACE_NUM,  // bInterfaceCount，本IAD下的接口数量
+  0X03,  // bFunctionClass
+  0X01,  // bFunctionSubClass
+  0X02,  // bFunctionProtocol
+  0X00,  // iFunction
+
+  /************** Descriptor of Joystick Mouse interface ****************/
+  /* 09 */
+  0x09,                                               /* bLength: Interface Descriptor size */
+  USB_DESC_TYPE_INTERFACE,                            /* bDescriptorType: Interface descriptor type */
+  0x00,                                               /* bInterfaceNumber: Number of Interface */
+  0x00,                                               /* bAlternateSetting: Alternate setting */
+  0x01,                                               /* bNumEndpoints */
+  0x03,                                               /* bInterfaceClass: HID */
+  0x01,                                               /* bInterfaceSubClass : 1=BOOT, 0=no boot */
+  0x02,                                               /* nInterfaceProtocol : 0=none, 1=keyboard, 2=mouse */
+  0,                                                  /* iInterface: Index of string descriptor */
+  /******************** Descriptor of Joystick Mouse HID ********************/
+  /* 18 */
+  0x09,                                               /* bLength: HID Descriptor size */
+  HID_DESCRIPTOR_TYPE,                                /* bDescriptorType: HID */
+  0x11,                                               /* bcdHID: HID Class Spec release number */
+  0x01,
+  0x00,                                               /* bCountryCode: Hardware target country */
+  0x01,                                               /* bNumDescriptors: Number of HID class descriptors to follow */
+  0x22,                                               /* bDescriptorType */
+  HID_MOUSE_REPORT_DESC_SIZE,                         /* wItemLength: Total length of Report descriptor */
+  0x00,
+  /******************** Descriptor of Mouse endpoint ********************/
+  /* 27 */
+  0x07,                                               /* bLength: Endpoint Descriptor size */
+  USB_DESC_TYPE_ENDPOINT,                             /* bDescriptorType:*/
+
+  HID_EPIN_ADDR,                                      /* bEndpointAddress: Endpoint Address (IN) */
+  0x03,                                               /* bmAttributes: Interrupt endpoint */
+  LOBYTE(HID_EPIN_SIZE),                                      /* wMaxPacketSize: 4 Bytes max */
+  HIBYTE(HID_EPIN_SIZE),                                      /* wMaxPacketSize: 4 Bytes max */
+  HID_FS_BINTERVAL,                                   /* bInterval: Polling Interval */
 } ;
 
 

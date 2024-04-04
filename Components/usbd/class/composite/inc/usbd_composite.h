@@ -1,16 +1,17 @@
 #ifndef USBD_COMPOSITE_H
 #define USBD_COMPOSITE_H
 #include "usbd_def.h"
+#include "usbd_gs_can.h"
 #include "usbd_cdc.h"
 #include "usbd_cdc_if.h"
-#include "usbd_gs_can.h"
+#include "usbd_hid.h"
 
 #define WBVAL(x) (x & 0xFF),((x >> 8) & 0xFF)
 
 #define USBD_IAD_DESC_SIZE           0x08
 #define USBD_IAD_DESCRIPTOR_TYPE     0x0B
 
-#define USBD_COMPOSITE_DESC_SIZ (9 + 8 + 41 + 8 + 58) // cchere
+#define USBD_COMPOSITE_DESC_SIZ (9 + 8 + 41 + 8 + 58 + 8 + 25) // cchere
 
 #define USBD_INTERFACE_NUM USBD_MAX_NUM_INTERFACES
 
@@ -30,14 +31,12 @@
 #define USBD_CDC_FIRST_INTERFACE USBD_CDC_CMD_INTERFACE
 #define USBD_CDC_INTERFACE_NUM 0x02
 
+#define USBD_HID_CLASSID 2
+#define USBD_HID_INTERFACE 0x04
+#define USBD_HID_INTERFACE_EP_NUM 0x01
+#define USBD_HID_FIRST_INTERFACE USBD_HID_INTERFACE
+#define USBD_HID_INTERFACE_NUM 0x01
 
 extern USBD_ClassTypeDef USBD_CMPSIT;
-
-
-void USBD_Composite_Switch_GS_CAN(USBD_HandleTypeDef *pdev);
-void USBD_Composite_Switch_CDC(USBD_HandleTypeDef *pdev);
-#ifdef USE_USBD_COMPOSITE
-void USBD_CMPSIT_AddClass(USBD_HandleTypeDef *pdev, USBD_ClassTypeDef *pclass, USBD_CompositeClassTypeDef classtype, uint8_t *EpAddr);
-#endif
 
 #endif
